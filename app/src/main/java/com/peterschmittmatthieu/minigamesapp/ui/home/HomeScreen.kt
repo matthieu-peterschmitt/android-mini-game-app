@@ -3,6 +3,7 @@ package com.peterschmittmatthieu.minigamesapp.ui.home
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -16,11 +17,14 @@ import androidx.compose.ui.unit.dp
 import com.peterschmittmatthieu.minigamesapp.ui.theme.MiniGamesAppTheme
 
 /**
- * Ecran d'accueil : point d'entree de l'application. Affiche le nom de
- * l'application et un bouton pour lancer le jeu de reaction.
+ * Ecran d'accueil : point d'entree de l'application. Propose les deux
+ * mini-jeux disponibles.
  */
 @Composable
-fun HomeScreen(onPlayClick: () -> Unit) {
+fun HomeScreen(
+    onReactionClick: () -> Unit,
+    onWordGameClick: () -> Unit,
+) {
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -34,16 +38,26 @@ fun HomeScreen(onPlayClick: () -> Unit) {
                 style = MaterialTheme.typography.headlineLarge,
             )
             Text(
-                text = "Jeu de reaction",
+                text = "Choisis un jeu",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 8.dp),
             )
             Button(
-                onClick = onPlayClick,
-                modifier = Modifier.padding(top = 48.dp),
+                onClick = onReactionClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 48.dp),
             ) {
-                Text("Jouer")
+                Text("Jeu de reaction")
+            }
+            Button(
+                onClick = onWordGameClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp),
+            ) {
+                Text("Mot cache")
             }
         }
     }
@@ -53,6 +67,6 @@ fun HomeScreen(onPlayClick: () -> Unit) {
 @Composable
 private fun HomeScreenPreview() {
     MiniGamesAppTheme {
-        HomeScreen(onPlayClick = {})
+        HomeScreen(onReactionClick = {}, onWordGameClick = {})
     }
 }

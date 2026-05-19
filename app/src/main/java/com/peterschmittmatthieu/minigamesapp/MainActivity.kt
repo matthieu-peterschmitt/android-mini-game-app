@@ -5,13 +5,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.peterschmittmatthieu.minigamesapp.ui.home.HomeScreen
 import com.peterschmittmatthieu.minigamesapp.ui.reaction.ReactionScreen
 import com.peterschmittmatthieu.minigamesapp.ui.theme.MiniGamesAppTheme
+import com.peterschmittmatthieu.minigamesapp.ui.wordgame.WordGameScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,17 +26,25 @@ class MainActivity : ComponentActivity() {
 }
 
 /**
- * Point d'entree de l'UI. Decide quel ecran afficher en fonction de l'etat
- * courant de l'application. La navigation est geree par un simple if/else sur
- * un etat booleen (Seance 1 — la navigation reelle arrive en Seance 2).
+ * Point d'entree de l'UI. Gere la pile d'ecrans via un NavHost et un
+ * NavController cree une seule fois au sommet de l'arborescence.
  */
 @Composable
 fun MiniGamesApp() {
-    var isPlaying by remember { mutableStateOf(false) }
+    val navController = rememberNavController()
 
-    if (isPlaying) {
-        ReactionScreen(onBackClick = { isPlaying = false })
-    } else {
-        HomeScreen(onPlayClick = { isPlaying = true })
+    NavHost(navController = navController, startDestination = Home) {
+        composable<Home> {
+            HomeScreen(
+                onReactionClick = { navController.navigate(Reaction) },
+                onWordGameClick = { navController.navigate(WordGame) },
+            )
+        }
+        composable<Reaction> {
+            ReactionScreen(onBackClick = { navController.popBackStack() })
+        }
+        composable<WordGame> {
+            WordGameScreen(onBackClick = { navController.popBackStack() })
+        }
     }
 }
