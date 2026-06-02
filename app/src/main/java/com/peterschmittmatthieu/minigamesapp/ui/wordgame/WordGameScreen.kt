@@ -39,10 +39,11 @@ import com.peterschmittmatthieu.minigamesapp.ui.wordgame.WordGameViewModel.Phase
  */
 @Composable
 fun WordGameScreen(
+    playerName: String,
     onBackClick: () -> Unit,
     viewModel: WordGameViewModel = viewModel(),
 ) {
-    LaunchedEffect(Unit) { viewModel.startGame() }
+    LaunchedEffect(Unit) { viewModel.startGame(playerName) }
     val state by viewModel.uiState.collectAsState()
 
     Surface(modifier = Modifier.fillMaxSize()) {
@@ -223,6 +224,6 @@ private fun GameOverContent(
 @Composable
 private fun WordGameScreenPreview() {
     MiniGamesAppTheme {
-        WordGameScreen(onBackClick = {})
+        WordGameScreen(playerName = "Joueur", onBackClick = {})
     }
 }

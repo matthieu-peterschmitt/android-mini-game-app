@@ -1,7 +1,11 @@
 package com.peterschmittmatthieu.minigamesapp.ui.wordgame
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.peterschmittmatthieu.minigamesapp.data.AppDatabase
+import com.peterschmittmatthieu.minigamesapp.data.Score
+import com.peterschmittmatthieu.minigamesapp.data.ScoreRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +19,13 @@ import kotlinx.coroutines.launch
  * 3x3 est generee : un mot est cache parmi ses lettres melangees avec quelques
  * lettres aleatoires. Le joueur a 60 secondes pour trouver un maximum de mots.
  */
-class WordGameViewModel : ViewModel() {
+class WordGameViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val repository =
+        ScoreRepository(AppDatabase.getDatabase(application).scoreDao())
+
+    /** Pseudo du joueur courant, fixe au demarrage de la partie. */
+    private var playerName: String = ""
 
     enum class Phase { PLAYING, GAME_OVER }
 
@@ -51,7 +61,8 @@ class WordGameViewModel : ViewModel() {
     )
 
     /** Demarre le timer et charge la premiere grille. */
-    fun startGame() {
+    fun startGame(playerName: String) {
+        this.playerName = playerName
         timerJob?.cancel()
         _uiState.value = WordGameUiState(phase = Phase.PLAYING)
         newGrid()
@@ -61,6 +72,7 @@ class WordGameViewModel : ViewModel() {
                 _uiState.update { it.copy(timeLeft = it.timeLeft - 1) }
             }
             _uiState.update { it.copy(phase = Phase.GAME_OVER) }
+            saveScore()
         }
     }
 
@@ -109,7 +121,17 @@ class WordGameViewModel : ViewModel() {
 
     /** Retour a PLAYING avec score et timer remis a zero. */
     fun reset() {
-        startGame()
+        startGame(playerName)
+    }
+
+    /** Enregistre le score final (nombre de mots trouves) en base. */
+    private fun saveScore() {
+        val finalScore = _uiState.value.score
+        viewModelScope.launch {
+            repository.insertScore(
+                Score(playerName = playerName, gameName = GAME_NAME, score = finalScore),
+            )
+        }
     }
 
     /** Genere une nouvelle grille : 6 lettres du mot + 3 lettres aleatoires. */
@@ -130,6 +152,7 @@ class WordGameViewModel : ViewModel() {
     }
 
     companion object {
+        const val GAME_NAME = "Mot cache"
         const val GAME_DURATION_SECONDS = 60
         private const val GRID_SIZE = 9
     }

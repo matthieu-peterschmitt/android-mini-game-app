@@ -31,6 +31,7 @@ import com.peterschmittmatthieu.minigamesapp.ui.theme.MiniGamesAppTheme
  */
 @Composable
 fun ReactionScreen(
+    playerName: String,
     onBackClick: () -> Unit,
     viewModel: ReactionViewModel = viewModel(),
 ) {
@@ -73,7 +74,7 @@ fun ReactionScreen(
             when (state.phase) {
                 Phase.READY -> {
                     Button(
-                        onClick = { viewModel.startGame() },
+                        onClick = { viewModel.startGame(playerName) },
                         modifier = Modifier.padding(top = 48.dp),
                     ) {
                         Text("Demarrer")
@@ -134,6 +135,6 @@ private fun formatMs(ms: Int): String = "%.2f s".format(ms / 1000.0)
 @Composable
 private fun ReactionScreenPreview() {
     MiniGamesAppTheme {
-        ReactionScreen(onBackClick = {})
+        ReactionScreen(playerName = "Joueur", onBackClick = {})
     }
 }

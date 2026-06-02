@@ -8,7 +8,9 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.peterschmittmatthieu.minigamesapp.ui.home.HomeScreen
+import com.peterschmittmatthieu.minigamesapp.ui.leaderboard.LeaderboardScreen
 import com.peterschmittmatthieu.minigamesapp.ui.reaction.ReactionScreen
 import com.peterschmittmatthieu.minigamesapp.ui.theme.MiniGamesAppTheme
 import com.peterschmittmatthieu.minigamesapp.ui.wordgame.WordGameScreen
@@ -36,15 +38,27 @@ fun MiniGamesApp() {
     NavHost(navController = navController, startDestination = Home) {
         composable<Home> {
             HomeScreen(
-                onReactionClick = { navController.navigate(Reaction) },
-                onWordGameClick = { navController.navigate(WordGame) },
+                onReactionClick = { name -> navController.navigate(Reaction(name)) },
+                onWordGameClick = { name -> navController.navigate(WordGame(name)) },
+                onLeaderboardClick = { navController.navigate(Leaderboard) },
             )
         }
-        composable<Reaction> {
-            ReactionScreen(onBackClick = { navController.popBackStack() })
+        composable<Reaction> { entry ->
+            val route = entry.toRoute<Reaction>()
+            ReactionScreen(
+                playerName = route.playerName,
+                onBackClick = { navController.popBackStack() },
+            )
         }
-        composable<WordGame> {
-            WordGameScreen(onBackClick = { navController.popBackStack() })
+        composable<WordGame> { entry ->
+            val route = entry.toRoute<WordGame>()
+            WordGameScreen(
+                playerName = route.playerName,
+                onBackClick = { navController.popBackStack() },
+            )
+        }
+        composable<Leaderboard> {
+            LeaderboardScreen(onBackClick = { navController.popBackStack() })
         }
     }
 }

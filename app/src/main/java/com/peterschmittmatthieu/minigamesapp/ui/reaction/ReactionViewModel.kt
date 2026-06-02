@@ -1,7 +1,11 @@
 package com.peterschmittmatthieu.minigamesapp.ui.reaction
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.peterschmittmatthieu.minigamesapp.data.AppDatabase
+import com.peterschmittmatthieu.minigamesapp.data.Score
+import com.peterschmittmatthieu.minigamesapp.data.ScoreRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +21,13 @@ import kotlin.random.Random
  * et aux changements de configuration ; le composable se contente d'afficher
  * [uiState] et d'appeler ses methodes.
  */
-class ReactionViewModel : ViewModel() {
+class ReactionViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val repository =
+        ScoreRepository(AppDatabase.getDatabase(application).scoreDao())
+
+    /** Pseudo du joueur courant, fixe au demarrage de la partie. */
+    private var playerName: String = ""
 
     enum class Phase { READY, PLAYING, RESULT }
 
@@ -40,7 +50,8 @@ class ReactionViewModel : ViewModel() {
     }
 
     /** Genere une nouvelle partie et lance le timer. */
-    fun startGame() {
+    fun startGame(playerName: String) {
+        this.playerName = playerName
         val target = Random.nextInt(6_000, 18_000)
         val magnitude = Random.nextInt(5, 21)
         val offset = Random.nextInt(2_000, 5_000)
@@ -64,13 +75,14 @@ class ReactionViewModel : ViewModel() {
         }
     }
 
-    /** Stoppe le timer et calcule l'ecart a la cible. */
+    /** Stoppe le timer, calcule l'ecart a la cible et sauvegarde le score. */
     fun stopTimer() {
         timerJob?.cancel()
         timerJob = null
         _uiState.update {
             it.copy(phase = Phase.RESULT, gap = abs(it.currentMs - it.target))
         }
+        saveScore()
     }
 
     /** Retour a l'etat initial (READY), pret pour une nouvelle partie. */
@@ -78,5 +90,23 @@ class ReactionViewModel : ViewModel() {
         timerJob?.cancel()
         timerJob = null
         _uiState.value = ReactionUiState()
+    }
+
+    /**
+     * Enregistre le score de la partie. L'ecart (plus petit = meilleur) est
+     * converti en points (plus grand = meilleur) pour le classement commun.
+     */
+    private fun saveScore() {
+        val points = (MAX_POINTS - _uiState.value.gap).coerceAtLeast(0)
+        viewModelScope.launch {
+            repository.insertScore(
+                Score(playerName = playerName, gameName = GAME_NAME, score = points),
+            )
+        }
+    }
+
+    companion object {
+        const val GAME_NAME = "Reaction"
+        private const val MAX_POINTS = 10_000
     }
 }
