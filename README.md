@@ -6,7 +6,7 @@ progressif sur 3 séances (CNAM – 1ère année).
 ## Binôme
 
 - Matthieu Peterschmitt
-- _(à compléter : nom du binôme, ou supprimer cette ligne si projet réalisé en solo)_
+- Charles Lesecq
 
 ## Branche à tester
 
