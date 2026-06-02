@@ -42,7 +42,6 @@ class WordGameViewModel(application: Application) : AndroidViewModel(application
         val score: Int = 0,
         val timeLeft: Int = GAME_DURATION_SECONDS,
         val wordLength: Int = 0,
-        val revealedWord: String? = null,
         // Bonus indice : premiere lettre revelee (une fois par grille).
         val hintLetter: String? = null,
         val hintUsed: Boolean = false,
@@ -116,12 +115,6 @@ class WordGameViewModel(application: Application) : AndroidViewModel(application
         newGrid()
     }
 
-    /** Revele le mot cache de la grille courante (sans marquer de point). */
-    fun revealWord() {
-        if (_uiState.value.phase != Phase.PLAYING) return
-        _uiState.update { it.copy(revealedWord = hiddenWord) }
-    }
-
     /**
      * Bonus indice : revele la premiere lettre du mot, une seule fois par
      * grille, en penalisant le score d'un point.
@@ -165,7 +158,6 @@ class WordGameViewModel(application: Application) : AndroidViewModel(application
                 grid = letters.map { c -> Cell(c) },
                 selectedIndices = emptyList(),
                 wordLength = word.length,
-                revealedWord = null,
                 hintLetter = null,
                 hintUsed = false,
             )

@@ -46,7 +46,6 @@ ainsi que l'ensemble des bonus listés au barème.
 - Jeu *Mot caché* : grille 3×3, sélection/effacement des lettres, validation, passage de grille,
   timer de 60 s, phase de fin avec score et rejouer.
 - **Bonus** : *Indice* — révèle la première lettre du mot (une fois par grille, pénalité d'un point).
-- Bouton *Réponse* supplémentaire qui révèle le mot complet (sans pénalité).
 
 ### Séance 3 — Persistance & leaderboard
 - Persistance locale avec Room : entité `Score`, `ScoreDao`, `AppDatabase` (singleton,

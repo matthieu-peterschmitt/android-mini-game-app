@@ -61,7 +61,6 @@ fun WordGameScreen(
                     onErase = viewModel::eraseLast,
                     onValidate = viewModel::validate,
                     onPass = viewModel::pass,
-                    onReveal = viewModel::revealWord,
                     onHint = viewModel::useHint,
                     onBackClick = onBackClick,
                 )
@@ -83,7 +82,6 @@ private fun PlayingContent(
     onErase: () -> Unit,
     onValidate: () -> Unit,
     onPass: () -> Unit,
-    onReveal: () -> Unit,
     onHint: () -> Unit,
     onBackClick: () -> Unit,
 ) {
@@ -108,14 +106,6 @@ private fun PlayingContent(
             text = "Commence par : ${state.hintLetter}",
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.tertiary,
-            modifier = Modifier.padding(top = 4.dp),
-        )
-    }
-    if (state.revealedWord != null) {
-        Text(
-            text = "Reponse : ${state.revealedWord}",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.error,
             modifier = Modifier.padding(top = 4.dp),
         )
     }
@@ -166,22 +156,12 @@ private fun PlayingContent(
         }
     }
 
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    OutlinedButton(
+        onClick = onHint,
+        enabled = !state.hintUsed,
         modifier = Modifier.padding(top = 8.dp),
     ) {
-        OutlinedButton(
-            onClick = onHint,
-            enabled = !state.hintUsed,
-        ) {
-            Text("Indice (-1)")
-        }
-        OutlinedButton(
-            onClick = onReveal,
-            enabled = state.revealedWord == null,
-        ) {
-            Text("Reponse")
-        }
+        Text("Indice (-1)")
     }
 
     OutlinedButton(
