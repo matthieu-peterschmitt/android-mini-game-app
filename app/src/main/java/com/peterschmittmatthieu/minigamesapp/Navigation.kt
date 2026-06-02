@@ -17,4 +17,4 @@ data class Reaction(val playerName: String)
 data class WordGame(val playerName: String)
 
 @Serializable
-object Leaderboard
+data class Leaderboard(val playerName: String)

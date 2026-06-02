@@ -40,7 +40,7 @@ fun MiniGamesApp() {
             HomeScreen(
                 onReactionClick = { name -> navController.navigate(Reaction(name)) },
                 onWordGameClick = { name -> navController.navigate(WordGame(name)) },
-                onLeaderboardClick = { navController.navigate(Leaderboard) },
+                onLeaderboardClick = { name -> navController.navigate(Leaderboard(name)) },
             )
         }
         composable<Reaction> { entry ->
@@ -57,8 +57,12 @@ fun MiniGamesApp() {
                 onBackClick = { navController.popBackStack() },
             )
         }
-        composable<Leaderboard> {
-            LeaderboardScreen(onBackClick = { navController.popBackStack() })
+        composable<Leaderboard> { entry ->
+            val route = entry.toRoute<Leaderboard>()
+            LeaderboardScreen(
+                playerName = route.playerName,
+                onBackClick = { navController.popBackStack() },
+            )
         }
     }
 }

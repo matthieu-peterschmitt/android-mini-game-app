@@ -31,7 +31,7 @@ import com.peterschmittmatthieu.minigamesapp.ui.theme.MiniGamesAppTheme
 fun HomeScreen(
     onReactionClick: (String) -> Unit,
     onWordGameClick: (String) -> Unit,
-    onLeaderboardClick: () -> Unit,
+    onLeaderboardClick: (String) -> Unit,
 ) {
     var playerName by remember { mutableStateOf("") }
     val canPlay = playerName.isNotBlank()
@@ -78,7 +78,7 @@ fun HomeScreen(
                 Text("Mot cache")
             }
             OutlinedButton(
-                onClick = onLeaderboardClick,
+                onClick = { onLeaderboardClick(playerName.trim()) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 12.dp),
