@@ -43,6 +43,9 @@ class WordGameViewModel(application: Application) : AndroidViewModel(application
         val timeLeft: Int = GAME_DURATION_SECONDS,
         val wordLength: Int = 0,
         val revealedWord: String? = null,
+        // Bonus indice : premiere lettre revelee (une fois par grille).
+        val hintLetter: String? = null,
+        val hintUsed: Boolean = false,
     ) {
         /** Lettres deja selectionnees, dans l'ordre. */
         val typedWord: String get() = selectedIndices.map { grid[it].char }.joinToString("")
@@ -119,6 +122,22 @@ class WordGameViewModel(application: Application) : AndroidViewModel(application
         _uiState.update { it.copy(revealedWord = hiddenWord) }
     }
 
+    /**
+     * Bonus indice : revele la premiere lettre du mot, une seule fois par
+     * grille, en penalisant le score d'un point.
+     */
+    fun useHint() {
+        val state = _uiState.value
+        if (state.phase != Phase.PLAYING || state.hintUsed) return
+        _uiState.update {
+            it.copy(
+                hintLetter = hiddenWord.first().toString(),
+                hintUsed = true,
+                score = (it.score - 1).coerceAtLeast(0),
+            )
+        }
+    }
+
     /** Retour a PLAYING avec score et timer remis a zero. */
     fun reset() {
         startGame(playerName)
@@ -147,6 +166,8 @@ class WordGameViewModel(application: Application) : AndroidViewModel(application
                 selectedIndices = emptyList(),
                 wordLength = word.length,
                 revealedWord = null,
+                hintLetter = null,
+                hintUsed = false,
             )
         }
     }
