@@ -2,6 +2,7 @@ package com.peterschmittmatthieu.minigamesapp.ui.reaction
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -9,6 +10,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -52,6 +54,16 @@ fun ReactionScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                 )
+                ToggleRow(
+                    label = "Timer aveugle",
+                    checked = state.blindMode,
+                    onToggle = { viewModel.toggleBlindMode() },
+                )
+                ToggleRow(
+                    label = "Vitesse variable",
+                    checked = state.variableSpeed,
+                    onToggle = { viewModel.toggleVariableSpeed() },
+                )
             } else {
                 Text(
                     text = "Cible",
@@ -63,7 +75,7 @@ fun ReactionScreen(
                     style = MaterialTheme.typography.headlineMedium,
                 )
                 Text(
-                    text = formatMs(state.currentMs),
+                    text = if (state.timerHidden) "? ? ?" else formatMs(state.currentMs),
                     fontFamily = FontFamily.Monospace,
                     fontSize = 56.sp,
                     color = MaterialTheme.colorScheme.primary,
@@ -116,6 +128,21 @@ fun ReactionScreen(
                 Text("Accueil")
             }
         }
+    }
+}
+
+/** Ligne d'option (label + interrupteur) affichee avant la partie. */
+@Composable
+private fun ToggleRow(label: String, checked: Boolean, onToggle: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(text = label, style = MaterialTheme.typography.bodyLarge)
+        Switch(checked = checked, onCheckedChange = { onToggle() })
     }
 }
 

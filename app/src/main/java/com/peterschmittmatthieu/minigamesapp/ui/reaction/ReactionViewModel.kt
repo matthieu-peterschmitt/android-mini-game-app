@@ -36,6 +36,11 @@ class ReactionViewModel(application: Application) : AndroidViewModel(application
         val target: Int = 0,
         val currentMs: Int = 0,
         val gap: Int = 0,
+        // Bonus : options choisies avant la partie.
+        val blindMode: Boolean = false,
+        val variableSpeed: Boolean = false,
+        // Bonus timer aveugle : vrai quand le timer doit etre masque.
+        val timerHidden: Boolean = false,
     )
 
     private val _uiState = MutableStateFlow(ReactionUiState())
@@ -52,6 +57,7 @@ class ReactionViewModel(application: Application) : AndroidViewModel(application
     /** Genere une nouvelle partie et lance le timer. */
     fun startGame(playerName: String) {
         this.playerName = playerName
+        val options = _uiState.value
         val target = Random.nextInt(6_000, 18_000)
         val magnitude = Random.nextInt(5, 21)
         val offset = Random.nextInt(2_000, 5_000)
@@ -65,14 +71,41 @@ class ReactionViewModel(application: Application) : AndroidViewModel(application
             phase = Phase.PLAYING,
             target = target,
             currentMs = start,
+            blindMode = options.blindMode,
+            variableSpeed = options.variableSpeed,
         )
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
+            var ticks = 0
             while (true) {
                 delay(10L)
-                _uiState.update { it.copy(currentMs = it.currentMs + step) }
+                ticks++
+                // Bonus vitesse variable : on change l'amplitude (en gardant le
+                // sens, pour que la cible reste atteignable) periodiquement.
+                if (_uiState.value.variableSpeed && ticks % SPEED_CHANGE_TICKS == 0) {
+                    val sign = if (step >= 0) 1 else -1
+                    step = Random.nextInt(5, 26) * sign
+                }
+                _uiState.update {
+                    val next = it.currentMs + step
+                    // Bonus timer aveugle : on masque le timer a l'approche.
+                    val hidden = it.blindMode && abs(next - it.target) < BLIND_THRESHOLD
+                    it.copy(currentMs = next, timerHidden = hidden)
+                }
             }
         }
+    }
+
+    /** Active/desactive le mode "timer aveugle" (avant la partie). */
+    fun toggleBlindMode() {
+        if (_uiState.value.phase != Phase.READY) return
+        _uiState.update { it.copy(blindMode = !it.blindMode) }
+    }
+
+    /** Active/desactive le mode "vitesse variable" (avant la partie). */
+    fun toggleVariableSpeed() {
+        if (_uiState.value.phase != Phase.READY) return
+        _uiState.update { it.copy(variableSpeed = !it.variableSpeed) }
     }
 
     /** Stoppe le timer, calcule l'ecart a la cible et sauvegarde le score. */
@@ -85,11 +118,15 @@ class ReactionViewModel(application: Application) : AndroidViewModel(application
         saveScore()
     }
 
-    /** Retour a l'etat initial (READY), pret pour une nouvelle partie. */
+    /** Retour a l'etat initial (READY) en conservant les options choisies. */
     fun reset() {
         timerJob?.cancel()
         timerJob = null
-        _uiState.value = ReactionUiState()
+        val options = _uiState.value
+        _uiState.value = ReactionUiState(
+            blindMode = options.blindMode,
+            variableSpeed = options.variableSpeed,
+        )
     }
 
     /**
@@ -108,5 +145,11 @@ class ReactionViewModel(application: Application) : AndroidViewModel(application
     companion object {
         const val GAME_NAME = "Reaction"
         private const val MAX_POINTS = 10_000
+
+        /** Sous cet ecart (ms), le timer aveugle se masque. */
+        private const val BLIND_THRESHOLD = 1_500
+
+        /** Nombre de ticks (x10 ms) entre deux changements de vitesse. */
+        private const val SPEED_CHANGE_TICKS = 60
     }
 }
